@@ -1,0 +1,33 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block title %}
+    Questions
+{% endblock %}
+
+
+{% block content %}
+  <div class="form_container"></div>
+    <div class="form-row align-items-center">
+        <button class="answer btn btn-success" type="button">Next</button>
+    </div>
+
+{% endblock %}
+{% block scripts %}
+    <script>
+        $(function () {
+
+            var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+            var ws_path = ws_scheme + '://' + window.location.host + "/tasktracker/{{ player.id }}";
+            var socket = new ReconnectingWebSocket(ws_path);
+            socket.onmessage = function (event) {
+                var obj = jQuery.parseJSON(event.data);
+                console.log(obj.myform);
+                $('.form_container').html(obj.myform);
+            };
+
+            ;
+        });
+    </script>
+{% endblock %}
+
