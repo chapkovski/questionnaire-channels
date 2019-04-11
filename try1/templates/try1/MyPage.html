@@ -1,0 +1,50 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block title %}
+    Questions
+{% endblock %}
+
+
+{% block content %}
+    <h1 class="question"></h1>
+    <div class="form-row align-items-center">
+        <button class="answer btn btn-success" type="button">Next</button>
+    </div>
+    <div>Number of answered tasks: <span class="num_answered">{{ player.num_answered1 }}</span></div>
+    <div>Number of correct tasks: <span class="num_correct">{{ player.num_correct1 }}</span></div>
+{% endblock %}
+{% block scripts %}
+    <script>
+        $(function () {
+
+            var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+            var ws_path = ws_scheme + '://' + window.location.host + "/tasktracker/{{ player.id }}";
+            var socket = new ReconnectingWebSocket(ws_path);
+            socket.onmessage = function (event) {
+                var obj = jQuery.parseJSON(event.data);
+                $('h1.question').html(obj.question);
+                $('input.choice').html(obj.choice)
+                $('span.num_answered').html(obj.num_answered1);
+                $('span.num_correct').html(obj.num_correct1);
+            };
+            $("button.answer").on("click", function () {
+                var msg = $('input#answer').val();
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.send(msg);
+                }
+                ;
+                $("input#answer").val('');
+            });
+
+            $("input#answer").keydown(function (event) {
+                if (event.keyCode == 13) {
+                    event.preventDefault();
+                    $("button.answer").click();
+                    return false;
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
