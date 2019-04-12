@@ -4,6 +4,11 @@ import json
 
 class TaskForm(forms.Form):
     def __init__(self, task, *args, **kwargs):
+        """
+        We get the task here, we get the choices from the corresponding questin.
+        and we render the form based on the task type (open/multiplechoice).
+        We also need to pass task_id there so the consumers can process it when the user delivers answer.
+        """
         super().__init__(*args, **kwargs)
         q = task.question
         if task.open:
