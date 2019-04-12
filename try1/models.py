@@ -4,25 +4,17 @@ from otree.api import (
     Currency as c, currency_range
 )
 from django.db import models as djmodels
+from django.db.models import F
 import json
+import random
 
 author = "Philip Chapkovski, chapkovski@gmail.com"
 
 doc = """
 Feeding the stream of questions to a player till he dies...
 
-So the procedure is the following:
-The guy reaches the page.
-The server shows him a multiple choice question;
-he provides the answer
-the answer is recorded 
-we show them the next one which is not answered yet correctly
-when there are no unsanswerd questions he proceeds to the next page.
-
-So we create a new answer to the question every time the client submits.
-We show him the choices retrieved from the question model
-
-We pick 
+The logic is the following:
+We need to request all questions that have no answers to it for this player
 """
 
 
@@ -32,7 +24,6 @@ class Constants(BaseConstants):
     num_rounds = 1
     with open('try1/quiz1.csv') as f:
         qs = list(csv.DictReader(f))
-    # print(qs)
 
 
 class Subsession(BaseSubsession):
@@ -51,6 +42,36 @@ class Group(BaseGroup):
 
 class Player(BasePlayer):
     dump_tasks = models.LongStringField()
+    qs_not_available = models.BooleanField(initial=False)
+
+    @property
+    def total_attempts(self):
+        return self.tasks.filter(answer__isnull=False).count()
+
+    @property
+    def correct_answers(self):
+        return self.tasks.filter(answer=F('question__solution')).count()
+
+    @property
+    def available_qs(self):
+        correct_qs_ids = self.tasks.filter(answer=F('question__solution')).values_list('question__id', flat=True)
+        return Q.objects.exclude(id__in=correct_qs_ids)
+
+    def get_random_question(self):
+        available_qs = self.available_qs
+        if available_qs.exists():
+            return random.choice(available_qs)
+
+    def get_or_create_task(self):
+        unfinished_tasks = self.tasks.filter(answer__isnull=True)
+        if unfinished_tasks.exists():
+            return unfinished_tasks.latest()
+        else:
+            q = self.get_random_question()
+            if q:
+                open = random.choice([True, False])
+                task = self.tasks.create(question=q, open=open)
+                return task
 
 
 class Q(djmodels.Model):
@@ -63,7 +84,16 @@ class Q(djmodels.Model):
 
 
 class Task(djmodels.Model):
-    player = djmodels.ForeignKey(to=Player, related_name='tasks')
-    question = djmodels.ForeignKey(to=Player, related_name='answers')
-    answer = models.StringField()
+    class Meta:
+        get_latest_by = 'created_at'
 
+    player = djmodels.ForeignKey(to=Player, related_name='tasks')
+    question = djmodels.ForeignKey(to=Q, related_name='answers')
+    answer = models.StringField()
+    open = models.BooleanField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def get_answer_time(self):
+        sec = (self.updated_at - self.created_at).total_seconds()
+        return f'{int((sec/60)%60):02d}:{int(sec):02d}'

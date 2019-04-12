@@ -1,17 +1,20 @@
 from django import forms
-from try1.models import Q
-import random
 import json
-from otree.api import widgets
 
 
 class TaskForm(forms.Form):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, task, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        pks = Q.objects.all().values_list('pk', flat=True)
-        rpk = random.choice(pks)
-        rQ = Q.objects.get(pk=rpk)
-        choices = json.loads(rQ.chs)
-        choices = ((c, c,) for c in choices)
-        self.fields['myfield'] = forms.ChoiceField(label=rQ.text, choices=choices,
-                                                   widget=widgets.RadioSelect)
+        q = task.question
+        if task.open:
+            choices = json.loads(q.chs)
+            choices = ((c, c,) for c in choices)
+            self.fields['question'] = forms.ChoiceField(label=q.text, choices=choices,
+                                                        widget=forms.RadioSelect(),
+                                                        required=True
+                                                        )
+        else:
+            self.fields['question'] = forms.CharField(label=q.text,
+                                                      required=True
+                                                      )
+        self.fields['question'].widget.attrs.update({'data-task': task.id})

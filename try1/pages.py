@@ -4,7 +4,8 @@ from .models import Constants
 
 
 class Task(Page):
-    pass
+    def is_displayed(self) -> bool:
+        return not self.player.qs_not_available
 
 
 class Results(Page):

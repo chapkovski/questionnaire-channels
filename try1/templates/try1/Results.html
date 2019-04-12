@@ -2,11 +2,46 @@
 {% load otree static %}
 
 {% block title %}
-    Page title
+    Results
 {% endblock %}
 
 {% block content %}
+    <table class="table table-striped table-hover">
+        <tr>
+            <td>Total attempts:</td>
+            <td>{{ player.total_attempts }}</td>
+        </tr>
+        <tr>
+            <td>Correct answers:</td>
+            <td>{{ player.correct_answers }}</td>
+        </tr>
+    </table>
+    <h5>Your answers</h5>
+    <table class="table table-striped table-hover">
+    <thead>
+    <th>Question</th>
+    <th>Your answer</th>
+    <th>Correct answer</th>
+    <th>Correct?</th>
+    <th>Time to answer (min:sec)</th>
+    </thead>
+        {% for t in  player.tasks.all %}
+            <tr>
+                <td>{{ t.question.text }}</td>
+                <td>{{ t.answer }}</td>
+                <td>{{ t.question.solution }}</td>
+                <td>{% if  t.answer == t.question.solution %}
+                    Yes
+                {% else %}
+                    No
+                {% endif %}
+                </td>
+                <td>{{ t.get_answer_time }}</td>
 
+            </tr>
+        {% endfor %}
+
+    </table>
     {% next_button %}
 {% endblock %}
 
