@@ -24,14 +24,16 @@ class Constants(BaseConstants):
         qs = list(csv.DictReader(f))
 
 
+
 class Subsession(BaseSubsession):
     def creating_session(self):
         for q in Constants.qs:
             choices = [q.get(f'choice{i}') for i in range(1, 5)]
-
             Q.objects.get_or_create(id=q['id'], defaults={'text': q['question'],
                                                           'chs': json.dumps(choices),
-                                                          'solution': q['solution']})
+                                                          'solution': q['solution'],
+                                                          'open': q['type']})
+
 
 
 class Group(BaseGroup):
@@ -73,9 +75,7 @@ class Player(BasePlayer):
         else:
             q = self.get_random_question()
             if q:
-                open = random.choice([True, False])  # we create a type of question (open/multiple choice) randomly
-                # Of course, this logic can be different.
-                task = self.tasks.create(question=q, open=open)
+                task = self.tasks.create(question=q)
                 return task
 
 
@@ -84,6 +84,7 @@ class Q(djmodels.Model):
     text = models.StringField()
     chs = models.StringField()
     solution = models.StringField()
+    open = models.BooleanField()
 
     def __str__(self):
         """We do not need this but it is convenient to have when we need to print the object (mostly for debugging."""
@@ -99,11 +100,11 @@ class Task(djmodels.Model):
     player = djmodels.ForeignKey(to=Player, related_name='tasks')
     question = djmodels.ForeignKey(to=Q, related_name='answers')
     answer = models.StringField()
-    open = models.BooleanField()
+
     created_at = models.DateTimeField(auto_now_add=True)  # this and the following field is to track time
     updated_at = models.DateTimeField(auto_now=True)
 
     def get_answer_time(self):
         """We need this to show the question durations for the user in a nice mode."""
         sec = (self.updated_at - self.created_at).total_seconds()
-        return f'{int((sec/60)%60):02d}:{int(sec):02d}'
+        return f'{int((sec / 60) % 60):02d}:{int(sec):02d}'

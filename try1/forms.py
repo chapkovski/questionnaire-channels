@@ -11,15 +11,16 @@ class TaskForm(forms.Form):
         """
         super().__init__(*args, **kwargs)
         q = task.question
-        if task.open:
+        if task.question.open:
+            self.fields['question'] = forms.CharField(label=q.text,
+                                                      required=True
+                                                      )
+        else:
             choices = json.loads(q.chs)
             choices = ((c, c,) for c in choices)
             self.fields['question'] = forms.ChoiceField(label=q.text, choices=choices,
                                                         widget=forms.RadioSelect(),
                                                         required=True
                                                         )
-        else:
-            self.fields['question'] = forms.CharField(label=q.text,
-                                                      required=True
-                                                      )
+
         self.fields['question'].widget.attrs.update({'data-task': task.id})
