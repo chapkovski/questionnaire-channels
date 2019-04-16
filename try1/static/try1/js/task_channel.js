@@ -20,9 +20,14 @@ $(function () {
         } else {
             $answer_el = $("input[name='question']:checked");
         }
-
+        var question_body = $('div.question_body').text();
         let validator = $form.validate({
+            rules: {
 
+                question: {
+                    equalTo: question_body,
+                }
+            },
             errorPlacement: function (error, element) {
                 if (element.attr("name") === "question") {
                     error.appendTo(".otree-modal-message");

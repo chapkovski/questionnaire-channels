@@ -2,13 +2,13 @@ from channels.generic.websockets import JsonWebsocketConsumer
 from django.utils.safestring import mark_safe
 from django.template.loader import render_to_string
 import logging
-from try1.forms import TaskForm
+from try1.forms import RealTaskForm, IntroTaskForm
 from try1.models import Player, Task
 
 logger = logging.getLogger(__name__)
 
 
-class TaskTracker(JsonWebsocketConsumer):
+class GenericTaskTracker(JsonWebsocketConsumer):
     url_pattern = (r'^/tasktracker/(?P<player_pk>[0-9]+)$')
 
     def clean_kwargs(self):
@@ -35,7 +35,7 @@ class TaskTracker(JsonWebsocketConsumer):
         task = player.get_or_create_task()
         if task:
             form_block = mark_safe(render_to_string('try1/includes/q_block.html', {
-                'form': TaskForm(task=task).as_table(),
+                'form': self.form(task=task).as_table(),
                 'player': player,
             }))
 
@@ -54,3 +54,13 @@ class TaskTracker(JsonWebsocketConsumer):
         """When the new message is receved, we register it (updating current task). and feed him/her back a new task."""
         self.process_task(content)
         self.feed_task()
+
+
+class IntroTaskTracker(JsonWebsocketConsumer):
+    url_pattern = (r'^/intro_task/(?P<player_pk>[0-9]+)$')
+    form = IntroTaskForm
+
+
+class RealTaskTracker(JsonWebsocketConsumer):
+    url_pattern = (r'^/real_task/(?P<player_pk>[0-9]+)$')
+    form = RealTaskForm

@@ -1,6 +1,6 @@
-
 <div class="inner-form">
-    {{ form }}
+    <div class="question_body">{{ form.question.label }}</div>
+    <div>{{ form.question.tag }}</div>
 </div>
 <div>Total attempts: <span class="total-counter">{{ player.total_attempts }}</span></div>
 <div>Correct answers: <span class="correct-counter">{{ player.correct_answers }}</span></div>

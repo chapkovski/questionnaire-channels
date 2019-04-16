@@ -19,7 +19,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.js"></script>
     <script>
         var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-        var ws_path = ws_scheme + '://' + window.location.host + "/tasktracker/{{ player.id }}";
+        var ws_path = ws_scheme + '://' + window.location.host + "/{{  channel_stem }}/{{ player.id }}";
         var socket = new ReconnectingWebSocket(ws_path);
     </script>
     <script src="{% static 'try1/js/task_channel.js' %}"></script>
