@@ -33,7 +33,6 @@ $(function () {
             let answer = $answer_el.val();
 
             let task_id = $answer_el.data('task');
-            console.log(task_id);
             var msg = {
                 'answer': answer,
                 'task_id': task_id,
@@ -46,13 +45,12 @@ $(function () {
             $('#error_modal').modal('show');
         }
         ;
-
+        validator.destroy();
 
     });
     $form.keydown(function (e) {
         if (e.keyCode == 13) {
             if (event.keyCode === 13) {
-                console.log('asdf');
                 event.preventDefault();
                 $btn_answer.click();
                 return false;

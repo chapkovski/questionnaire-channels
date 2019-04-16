@@ -18,7 +18,7 @@ Feeding the stream of questions to a player till he dies...
 
 class Constants(BaseConstants):
     name_in_url = 'try1'
-    players_per_group = None
+    players_per_group = 2
     num_rounds = 1
     with open('try1/quiz1.csv') as f:
         qs = list(csv.DictReader(f))

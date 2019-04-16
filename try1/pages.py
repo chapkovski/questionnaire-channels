@@ -4,6 +4,7 @@ from .models import Constants
 
 
 class Task(Page):
+    timeout_seconds = 5
     def is_displayed(self) -> bool:
         return not self.player.qs_not_available
 
